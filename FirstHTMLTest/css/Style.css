@@ -1,0 +1,70 @@
+body {
+    background-color: #555}
+
+.About{
+    background-color: whitesmoke;
+    width: 1200px;
+    margin: auto;}
+
+.Me {
+    padding-top: 5px;
+    padding-left: 10px;
+    width: 1100px;}
+
+.Skills{
+    padding-left: 10px;
+    padding-bottom: 5px;
+    width: 1100px;}
+
+.Contact{
+    background-color: whitesmoke;
+    width: 1200px;
+    margin: auto;}
+
+.Info{
+    padding-left: 100px;
+    padding-top: 5px;
+    padding-bottom: 20px;
+    width: 1100px;}
+
+.Image{
+    padding-right: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;}
+
+.Header {
+    background-color: #555;}
+
+.Header H1 {
+    text-align: center;
+    color: white;}
+
+.Navigation ul {
+  list-style-type: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  background-color: #333333;
+  width: 1200px;}
+
+.Navigation li {
+  float: left;}
+
+.Navigation li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 16px;
+  text-decoration: none;}
+
+.Navigation li a:hover {
+  background-color: #202020;}
+
+.Active {
+    background-color: #111111;}
+
+.link {
+    background-color: #404040;}
+
+.Footer {
+    background-color: #555;}
