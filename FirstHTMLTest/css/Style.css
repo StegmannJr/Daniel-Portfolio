@@ -1,38 +1,39 @@
 body {background-color: #555}
 
-.col {
-
-}
-
 .About{
     background-color: whitesmoke;
-    width: 1400px;
+    max-width: 1400px;
+    width: 90%;
     margin: auto;
 }
 
 .Me {
     padding-top: 5px;
     padding-left: 10px;
-    width: 1100px;
+    max-width: 1100px;
+    width: 80%;
 }
 
 .Skills{
     padding-left: 10px;
     padding-bottom: 5px;
-    width: 1100px;
+    max-width: 1100px;
+    width: 80%;
 }
 
 .Contact{
     background-color: whitesmoke;
-    width: 1400px;
+    max-width: 1400px;
+    width: 90%;
     margin: auto;
 }
 
 .Info{
-    padding-left: 100px;
+    padding-left: 10px;
     padding-top: 5px;
     padding-bottom: 20px;
-    width: 1100px;
+    max-width: 1100px;
+    width: 80%;
 }
 
 header {background-color: #555;}
@@ -42,18 +43,19 @@ header h1 {
     color: white;
 }
 
-.Navigation ul {
+nav ul {
   list-style-type: none;
   margin: auto;
   padding: 0;
   overflow: hidden;
   background-color: #333333;
-  width: 1400px;
+  max-width: 1400px;
+  width: 90%;
 }
 
-.Navigation li {float: left;}
+nav li {float: left;}
 
-.Navigation li a {
+nav li a {
   display: block;
   color: white;
   text-align: center;
@@ -61,7 +63,7 @@ header h1 {
   text-decoration: none;
 }
 
-.Navigation li a:hover {background-color: #202020;}
+nav li a:hover {background-color: #202020;}
 
 .Active {background-color: #111111;}
 
