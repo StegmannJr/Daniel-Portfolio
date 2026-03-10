@@ -2,8 +2,9 @@ body {background-color: #555}
 
 .container{
     display: flex;
-    gap: auto;
+    gap: 40px;
     max-width: 1400px;
+    box-sizing: border-box;
     width: 90%;
     margin: auto;
     background-color: whitesmoke;
