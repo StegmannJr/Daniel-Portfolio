@@ -14,7 +14,7 @@ body {background-color: #555}
 .DAB-Billede{
     float: right; 
     height: 350px; 
-    width: 300px; 
+    width: auto; 
     padding-right: 20px;
     padding-top: 20px;
 }
@@ -25,6 +25,11 @@ body {background-color: #555}
 }
 
 .co-work{
+    flex: 1;
+    padding: 20px;
+}
+
+.co-lang{
     flex: 1;
     padding: 20px;
 }
