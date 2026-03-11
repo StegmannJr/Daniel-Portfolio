@@ -61,7 +61,10 @@ nav ul {
   width: 90%;
 }
 
-nav li {float: left;}
+nav li {
+    float: left;
+    width: 33.33%;
+}
 
 nav li a {
   display: block;
@@ -73,7 +76,7 @@ nav li a {
 
 nav li a:hover {background-color: #202020;}
 
-.Active {background-color: #111111;}
+.active {background-color: #111111;}
 
 .link {background-color: #404040;}
 
