@@ -81,3 +81,8 @@ nav li a:hover {background-color: #202020;}
 .link {background-color: #404040;}
 
 footer {background-color: #555;}
+
+footer h4{
+    text-align: center;
+    color: white;
+}
