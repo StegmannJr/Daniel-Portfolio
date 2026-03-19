@@ -37,11 +37,13 @@ body {background-color: #555}
 .co-skills{
     flex: 1;
     padding: 20px;
+    padding-top: 8px;
 }
 
 .co-contact{
     flex: 1;
     padding: 20px;
+    padding-top: 8px;
 }
 
 header {background-color: #555;}
