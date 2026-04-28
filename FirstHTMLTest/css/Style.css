@@ -24,6 +24,11 @@ body {background-color: #555}
     padding: 20px;
 }
 
+.co-life{
+    flex: 1;
+    padding: 20px;
+}
+
 .co-work{
     flex: 1;
     padding: 20px;
