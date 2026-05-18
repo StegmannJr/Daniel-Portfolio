@@ -1,0 +1,133 @@
+header {
+    text-align: center;
+}
+
+body {
+    background-color: #f0f0f0;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+}
+
+#game-container {
+    width: 600px;
+    height: 350px;
+    background-color: #e0f8d0;
+    border: 4px solid #333;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.info-box {
+    background: white;
+    border: 2px solid #555;
+    border-radius: 5px;
+    padding: 10px;
+    height: fit-content;
+    box-shadow: 3px 3px 0px #888;
+}
+
+.sprite-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sprite-container img {
+    width: 120px;
+    height: 120px;
+}
+
+#opponent-info {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+}
+
+#opponent-sprite-container {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+#player-sprite-container {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+#player-info {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+}
+
+.hp-bar {
+    width: 150px;
+    height: 12px;
+    background-color: #ddd;
+    border: 1px solid #000;
+    border-radius: 3px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+#player-hp-fill, #opponent-hp-fill {
+    width: 0%;
+    height: 100%;
+    background-color: #4caf50;
+    transition: width 0.5s ease-in-out;
+}
+
+#battle-menu-container {
+    width: 600px;
+    height: 120px;
+    background-color: #fff;
+    border: 4px solid #333;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    box-sizing: border-box;
+}
+
+#battle-log {
+    flex: 3;
+    padding: 15px;
+    border-right: 4px solid #333;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+#menu-actions {
+    flex: 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 5px;
+    padding: 10px;
+    background-color: #f8f8f8;
+}
+
+#menu-button {
+    background-color: white;
+    border: 2px solid #333;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.menu-button:hover {
+    background-color: #ddd;
+}
+
+footer {
+    text-align: center;
+}

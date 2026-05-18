@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pokémon Kampspil</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" href="./Images/Pokemon-Logo-color.png">
+</head>
+<body>
+    <header>
+        <img src="./Images/Pokemon-Logo-Custom.png" alt="Error! Image not found.">
+    </header>
+    <div id="game-container">
+        <div id="opponent-section" class="info-box">
+            <h2 id="opponent-name">...</h2>
+            <div class="hp-bar"><div id="opponent-hp-fill"></div></div>
+        </div>
+
+        <div id="opponent-sprite-container" class="sprite-container">
+            <img id="opponent-sprite" src="" alt="">
+        </div>
+        
+        <div id="player-sprite-container" class="sprite-container">
+            <img id="player-sprite" src="" alt="">
+        </div>
+        
+        <div id="player-section" class="info-box">
+            <h2 id="player-name">Loading...</h2>
+            <div class="hp-bar"><div id="player-hp-fill"></div></div>
+            <p>HP: <span id="player-hp-text">0/0</span></p>
+            <div id="move-buttons"></div>
+        </div>
+    </div>
+    <div id="battle-menu-container">
+        <div id="battle-log">
+            <p id="log-text">click the button to start the fight!</p>
+        </div>
+
+        <div id="menu-actions">
+            <button type="button" class="menu-button" id="button-1" onclick="handleMenuClick(1)">FIGHT</button>
+            <button type="button" class="menu-button" id="button-2" onclick="handleMenuClick(2)">BAG</button>
+            <button type="button" class="menu-button" id="button-3" onclick="handleMenuClick(3)">POKÉMON</button>
+            <button type="button" class="menu-button" id="button-4" onclick="handleMenuClick(4)">RUN</button>
+        </div>
+    </div>
+
+    <script src="./JavaScript/pokemon.js"></script>
+    <footer>
+        <h4>&#169; 2026 Daniel Stegmann Henriksen</h4>
+    </footer>
+</body>
