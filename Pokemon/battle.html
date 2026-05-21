@@ -9,9 +9,17 @@
     <header>
         <img src="./Images/Pokemon-Logo-Custom.png" alt="Error! Image not found.">
     </header>
+    <div id="pokedex-container" style="display: none; background: #eee; padding: 20px;">
+        <button onclick="togglePokedex(false)">CLOSE POKÉDEX</button>
+        <div id="pokedex-grid" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
+    </div>
     <div id="game-container">
         <div id="opponent-section" class="info-box">
-            <h2 id="opponent-name">...</h2>
+            <div class="pokemon-header">
+                <span id="opponent-name" style="font-weight: bold; font-size: 22px;">...</span>
+                <span id="opponent-status" class="status-badge"></span>
+                <span class="level-text">LV<span id="opponent-level">1</span></span>
+            </div>
             <div class="hp-bar"><div id="opponent-hp-fill"></div></div>
         </div>
 
@@ -24,9 +32,14 @@
         </div>
         
         <div id="player-section" class="info-box">
-            <h2 id="player-name">Loading...</h2>
+            <div class="pokemon-header">
+                <span id="player-name" style="font-weight: bold; font-size: 22px;">Loading...</span>
+                <span id="player-status" class="status-badge"></span>
+                <span class="level-text">LV<span id="player-level">1</span></span>
+            </div>
             <div class="hp-bar"><div id="player-hp-fill"></div></div>
             <p>HP: <span id="player-hp-text">0/0</span></p>
+            <div class="xp-bar"><div id="player-xp-fill"></div></div>
             <div id="move-buttons"></div>
         </div>
     </div>
@@ -40,6 +53,8 @@
             <button type="button" class="menu-button" id="button-2" onclick="handleMenuClick(2)">BAG</button>
             <button type="button" class="menu-button" id="button-3" onclick="handleMenuClick(3)">POKÉMON</button>
             <button type="button" class="menu-button" id="button-4" onclick="handleMenuClick(4)">RUN</button>
+            <button type="button" id="button-back" style="display: none; background-color: #f44336; 
+            color: white;" id="button-5" onclick="handleBackClick()">BACK</button>
         </div>
     </div>
 

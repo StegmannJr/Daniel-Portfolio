@@ -72,6 +72,20 @@ body {
     justify-self: end;
 }
 
+.pokemon-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.level-text {
+    font-size: 0.85em;
+    font-weight: bold;
+    padding-right: 5px;
+}
+
 .hp-bar {
     width: 150px;
     height: 12px;
@@ -80,6 +94,23 @@ body {
     border-radius: 3px;
     margin-top: 5px;
     overflow: hidden;
+}
+
+.xp-bar {
+    width: 180px; 
+    height: 12px;
+    background-color: #333; 
+    border: 1px solid #000;
+    border-radius: 3px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+#player-xp-fill {
+    width: 0%;
+    height: 100%;
+    background-color: #2196F3;
+    transition: width 0.3s ease-in-out;
 }
 
 #player-hp-fill, #opponent-hp-fill {
@@ -131,6 +162,23 @@ body {
 
 .menu-button:hover {
     background-color: #ddd;
+}
+
+.pokedex-card.unknown {
+    background-color: #ddd;
+    border: 2px dashed #999;
+    opacity: 0.6;
+}
+
+.pokedex-silhuette {
+    font-size: 40px;
+    font-weight: bold;
+    color: #777;
+    margin: 10px 0;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 footer {
