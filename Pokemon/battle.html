@@ -13,6 +13,23 @@
         <button onclick="togglePokedex(false)">CLOSE POKÉDEX</button>
         <div id="pokedex-grid" style="display: flex; flex-wrap: wrap; gap: 10px;"></div>
     </div>
+    <div id="start-menu" class="start-overlay">
+            <h2>Chose your Starter Pokémon!</h2>
+            <div class="start-options">
+                <button onclick="chooseStarter(1)">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png" alt="Bulbasaur"><br>
+                    BULBASAUR
+                </button>
+                <button onclick="chooseStarter(4)">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png" alt="Charmander"><br>
+                    CHARMANDER
+                </button>
+                <button onclick="chooseStarter(7)">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png" alt="Squirtle"><br>
+                    SQUIRTLE
+                </button>
+            </div>
+        </div>
     <div id="game-container">
         <div id="opponent-section" class="info-box">
             <div class="pokemon-header">

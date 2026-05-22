@@ -1,9 +1,8 @@
 let pokedexList = [];
-
 let KantoPokedex = [];
 
-let playerPokemon = null;
-let opponentPokemon = null;
+let playerPokemon = {};
+let opponentPokemon = {};
 
 let currentMenuState = "start";
 let isBattleActive = false;
@@ -63,6 +62,25 @@ const typeChart = {
     fairy: { fire: 0.5, fighting: 2, poison: 0.5, dragon: 2, dark: 2, steel: 0.5}
 }
 
+function checkNewMovesForLevels(apiData, level) {
+    const newMoves = [];
+
+    apiData.moves.forEach(moveData => {
+        const details = moveData.version_group_details[0];
+
+        if (details && details.move_learn_method.name === "level-up") {
+            if (details.level_learned_at === level) {
+                newMoves.push({
+                    name: moveData.move.name,
+                    url: moveData.move.url
+                });
+            }
+        }
+    });
+
+    return newMoves;
+}
+
 async function checkEvolution() {
     if (isEvolving) return;
 
@@ -100,6 +118,8 @@ async function checkEvolution() {
                     evolutionIDTarget = targetId;
                     isEvolving = true;
 
+                    isBattleActive = false;
+
                     setTimeout(() => {
                         const logElement = document.getElementById("log-text");
                         if (logElement) {
@@ -128,10 +148,6 @@ function updatePlayerUI() {
     document.getElementById("player-hp-fill").style.width = `${playerHpProcent}%`;
 
     updateStatusUI();
-
-    if (isBattleActive) {
-        updateMenu("main");
-    }
 }
 
 function updateXPUI() {
@@ -146,7 +162,7 @@ function updateXPUI() {
     }
 }
 
-function gainXP(amount) {
+async function gainXP(amount) {
     const logElement = document.getElementById("log-text");
     playerXP += amount;
 
@@ -169,7 +185,7 @@ function gainXP(amount) {
 
         if (logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} grew to level ${playerLevel}!`;
 
-        checkAndLearnNewMove(playerLevel);
+        await checkAndLearnNewMove(playerLevel);
     }
 
     checkEvolution();
@@ -219,12 +235,14 @@ async function checkAndLearnNewMove(newLevel) {
                 moveToLearn = newMove;
                 isLearningMove = true;
 
-                setTimeout(() => {
+                return new Promise((resolve) => {
                     if (logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} wants to learn the move 
                     ${newMove.name.toUpperCase()}!<br>But it already knows 4 moves. Select a move to forget:`;
 
                     updateMenu("learn-move");
-                }, 1000);
+
+                    window.resolveMoveLearning = resolve;
+                });
             }
         }
     }
@@ -242,17 +260,72 @@ function togglePokedex(show) {
 }
 
 async function chooseStarter(starterId) {
+    const logElement = document.getElementById("log-text");
+    if (logElement) logElement.innerText = "Loading your partner...";
+
     playerPokemon = await getPokemonData(starterId);
+
 
     if (!pokedexList.includes(starterId)) {
         pokedexList.push(starterId);
     }
 
-    await pokedex();
+    const startOverlay = document.getElementById("start-menu");
+    if (startOverlay)  { 
+        startOverlay.style.display = "none"; 
+        startOverlay.style.opacity = "0";
+        startOverlay.style.pointerEvents = "none";
+    }
+
+    updatePlayerUI();
+
+    endBattle();
+}
+
+async function startNewBattle() {
+    isBattleActive = true;
+    isPlayerTurn = true;
+    currentMenuState = "main";
+
+    playerStats.attack = 0;
+    playerStats.defense = 0;
+    playerStats.specialAttack = 0;
+    playerStats.specialDefense = 0;
+    playerStats.speed = 0;
+
+    opponentStats.attack = 0;
+    opponentStats.defense = 0;
+    opponentStats.specialAttack = 0;
+    opponentStats.specialDefense = 0;
+    opponentStats.speed = 0;
+
+    const levelOffSet = Math.floor(Math.random() * 3) - 1;
+    opponentLevel = Math.max(2, playerLevel + levelOffSet);
+
+    const randomIndex = Math.floor(Math.random() * encouterpool.length);
+    const randomOpponent = encouterpool[randomIndex];
+
+    opponentPokemon = await getPokemonData(randomOpponent);
+    opponentPokemon.hp = opponentPokemon.maxhp;
+
+    updatePlayerUI();
+
+    document.getElementById("opponent-name").innerText = opponentPokemon.name.toUpperCase();
+    document.getElementById("opponent-level").innerText = opponentLevel;
+    document.getElementById("opponent-sprite").src = opponentPokemon.spriteFront;
+    document.getElementById("opponent-hp-fill").style.width = "100%";
+
+    const logElement = document.getElementById("log-text");
+    if (logElement) logElement.innerHTML = `A wild ${opponentPokemon.name.toUpperCase()} appeared!<br>What will ${playerPokemon.name.toUpperCase()} do?`;
+
+    updateMenu("main");
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    chooseStarter(4);
+    pokedex();
+
+    const startOverlay = document.getElementById("start-menu");
+    if (startOverlay) startOverlay.style.display = "flex";
 });
 
 async function pokedex() {
@@ -304,8 +377,31 @@ function renderPokedex() {
                     togglePokedex(false);
 
                     isPlayerTurn = false;
+                    updateMenu("main");
+
                     setTimeout(() => {
-                        doOpponentAttack();
+                        if (!isBattleActive) return;
+
+                        const randomIndex = Math.floor(Math.random() * opponentPokemon.moves.length);
+                        const opponentMove = opponentPokemon.moves[randomIndex];
+
+                        if (canPokemonAttack(opponentPokemon, false)) {
+                            if (checkMoveHit(opponentMove, opponentPokemon.name)) {
+                                doOpponentAttack(opponentMove);
+                            }
+                        }
+
+                        setTimeout(() => {
+                            if (!isBattleActive || playerPokemon.hp <= 0 || opponentPokemon.hp <= 0) return;
+
+                            const keepFighting = applyEndResultDamage();
+
+                            if (keepFighting && isBattleActive) {
+                                if (logElement) logElement.innerText = `What will ${playerPokemon.name.toUpperCase()} do?`;
+                                updateMenu("main");
+                                isPlayerTurn = true;
+                            }
+                        }, 1000);
                     }, 1000);
 
                 } else {
@@ -314,6 +410,8 @@ function renderPokedex() {
                     togglePokedex(false);
                 }
             }
+
+            
         } else {
             card.className = "pokedex-card unknown";
             card.innerHTML = `
@@ -462,6 +560,9 @@ async function pokemonUpdate() {
         if (!pokedexList.includes(4)) pokedexList.push(4);
     }
 
+    const levelOffSet = Math.floor(Math.random() * 3) - 1;
+    opponentLevel = Math.max(2, playerLevel + levelOffSet);
+
     const randomIndex = Math.floor(Math.random() * encouterpool.length);
     const randomOpponent = encouterpool[randomIndex];
 
@@ -506,7 +607,7 @@ function updateStatusUI() {
     const opponentStatusEl = document.getElementById("opponent-status");
 
     if (playerStatusEl) {
-        if (playerPokemon.status !== "none") {
+        if (playerPokemon && playerPokemon.status && playerPokemon.status !== "none" && playerPokemon.status !== "") {
             playerStatusEl.innerText = `[${playerPokemon.status.substring(0, 3).toUpperCase()}]`
             playerStatusEl.className = `status-badge ${playerPokemon.status}`;
         } else {
@@ -515,7 +616,7 @@ function updateStatusUI() {
     }
 
     if (opponentStatusEl) {
-        if (opponentPokemon.status !== "none") {
+        if (opponentPokemon && opponentPokemon.status && opponentPokemon.status !== "none" && opponentPokemon.status !== "") {
             opponentStatusEl.innerText = `[${opponentPokemon.status.substring(0, 3).toUpperCase()}]`;
             opponentStatusEl.className = `status-badge ${opponentPokemon.status}`;
         } else {
@@ -586,6 +687,10 @@ function handleMenuClick(buttonNumber) {
         isLearningMove = false;
         moveToLearn = null;
 
+        if (window.resolveMoveLearning) {
+            window.resolveMoveLearning();
+        }
+
         setTimeout(() => {
             endBattle();
         }, 1000);
@@ -593,7 +698,7 @@ function handleMenuClick(buttonNumber) {
     }
 
     if (!isBattleActive) {
-        if (buttonNumber === 1) pokemonUpdate();
+        if (buttonNumber === 1) startNewBattle();
         else if (buttonNumber === 2) togglePokedex(true);
         else if (buttonNumber === 5) handleBackClick();
 
@@ -634,7 +739,6 @@ function updateMenu(state) {
         button3.innerText = "POKEMON";
         button4.innerText = "RUN";
         if (backButton) backButton.style.display = "none";
-        updatePlayerUI();
     }
 
     else if (state === "fight") {
@@ -800,6 +904,36 @@ async function executeEvolution() {
     playerPokemon.hp = playerPokemon.maxhp;
     playerPokemon.moves = currentMoves;
 
+    const evolutionMoves = checkNewMovesForLevels(data, playerLevel);
+
+    for (const newMove of evolutionMoves) {
+        const alreadyknows = playerPokemon.moves.some(m => m.name === newMove.name);
+
+        if (!alreadyknows) {
+            const moveResponse = await fetch(newMove.url);
+            const moveData = await moveResponse.json();
+
+            const formattedMove = {
+                name: moveData.name,
+                power: moveData.power,
+                accuracy: moveData.accuracy || 100,
+                damageClass: moveData.damage_class,
+                statChange: moveData.stat_changes && moveData.stat_changes.length > 0 ? {
+                    change: moveData.stat_changes[0].change,
+                    stat: moveData.stat_changes[0].stat.name
+                } : null
+            };
+
+            if (playerPokemon.moves.length < 4) {
+                playerPokemon.moves.push(formattedMove);
+            } else {
+                if (logElement) logElement.innerHTML += `${playerPokemon.name.toUpperCase()} wants to learn the move ${formattedMove.name.toUpperCase()}, but already knows 4 moves!`;
+                
+                updateMenu("learn-move");
+            }
+        }
+    }
+
     if (!pokedexList.includes(playerPokemon.id)) {
         pokedexList.push(playerPokemon.id);
     }
@@ -808,6 +942,8 @@ async function executeEvolution() {
 
     isEvolving = false;
     evolutionIDTarget = null;
+
+    return true;
 }
 
 function doPlayerAttack(playerMove) {
@@ -1001,7 +1137,7 @@ function canPokemonAttack(pokemon, isPlayer) {
     return true;
 }
 
-function applyEndResultDamage() {
+async function applyEndResultDamage() {
     const logElement = document.getElementById("log-text");
     let extraLog = "";
 
@@ -1054,13 +1190,10 @@ function endBattle() {
     const logElement = document.getElementById("log-text");
     if (logElement) logElement.innerText = "Battle over! you can click on OPEN POKEDEX to swap your Pokemon"
 
-    const button1 = document.getElementById("button-1");
-    button1.innerText = "NEXT FIGHT";
-
-    const button2 = document.getElementById("button-2");
-    button2.innerText = "OPEN POKEDEX";
-
+    document.getElementById("button-1").innerText = "NEXT FIGHT";
+    document.getElementById("button-2").innerText = "OPEN POKEDEX";
     document.getElementById("button-3").innerText = "-";
     document.getElementById("button-4").innerText = "-";
-
+    const backButton = document.getElementById("button-back");
+    if (backButton) backButton.style.display = "none";
 }
