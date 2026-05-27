@@ -1,6 +1,9 @@
 let pokedexList = [];
 let KantoPokedex = [];
 
+let playerParty = [];
+let currentPartyIndex = 0;
+
 let playerPokemon = {};
 let opponentPokemon = {};
 
@@ -20,6 +23,8 @@ let xpNeededForLevel = 100;
 let isEvolving = false;
 let evolutionIDTarget = null;
 let evolutionTargetName = "";
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const levelOffSet = Math.floor(Math.random() * 3) - 1;
 
@@ -60,6 +65,496 @@ const typeChart = {
     dark: { fighting: 0.5, psychic: 2, ghost: 2, dark: 0.5, fairy: 0.5},
     steel: { fire: 0.5, water: 0.5, electric: 0.5, ice: 2, rock: 2, steel: 0.5, fairy: 2},
     fairy: { fire: 0.5, fighting: 2, poison: 0.5, dragon: 2, dark: 2, steel: 0.5}
+}
+
+const natureData = {
+    Hardy:    { plus: null, minus: null },
+    Lonely:   { plus: "attack", minus: "defense" },
+    Brave:    { plus: "attack", minus: "speed" },
+    Adamant:  { plus: "attack", minus: "specialAttack" },
+    Naughty:  { plus: "attack", minus: "specialDefense" },
+    Bold:     { plus: "defense", minus: "attack" },
+    Docile:   { plus: null, minus: null },
+    Relaxed:  { plus: "defense", minus: "speed" },
+    Impish:   { plus: "defense", minus: "specialAttack" },
+    Lax:      { plus: "defense", minus: "specialDefense" },
+    Timid:    { plus: "speed", minus: "attack" },
+    Hasty:    { plus: "speed", minus: "defense" },
+    Serious:  { plus: null, minus: null },
+    Jolly:    { plus: "speed", minus: "specialAttack" },
+    Naive:    { plus: "speed", minus: "specialDefense" },
+    Modest:   { plus: "specialAttack", minus: "attack" },
+    Mild:     { plus: "specialAttack", minus: "defense" },
+    Quiet:    { plus: "specialAttack", minus: "speed" },
+    Bashful:  { plus: null, minus: null },
+    Rash:     { plus: "specialAttack", minus: "specialDefense" },
+    Calm:     { plus: "specialDefense", minus: "attack" },
+    Gentle:   { plus: "specialDefense", minus: "defense" },
+    Sassy:    { plus: "specialDefense", minus: "speed" },
+    Careful:  { plus: "specialDefense", minus: "specialAttack" },
+    Quirky:   { plus: null, minus: null }
+}
+
+const worldMap = {
+    "Palet Town": {
+        name: "Palet Town",
+        requiredWaves: 0,
+        spawnPool: [],
+        nextZones: ["Route 1"]
+    },
+    "Route 1": {
+        name: "Route 1",
+        requiredWaves: 10,
+        spawnPool: [16, 19],
+        minLevel: 2,
+        maxLevel: 5,
+        nextZones: ["Viridian City"]
+    },
+    "Viridian City": {
+        name: "Viridian City",
+        requiredWaves: 1, /* Locked until 7th badge - Giovanni */
+        spawnPool: [],
+        nextZones: ["Route 22", "Route 2"]
+    },
+    "Route 22": {
+        name: "Route 22",
+        requiredWaves: 10,
+        spawnPool: [19, 21, 56],
+        minLevel: 2,
+        maxLevel: 5,
+        nextZones: ["Route 23" /* is locked until Giovani is beaten as 8th gym badge*/]
+    },
+    "Route 2-South": {
+        name: "Route 2",
+        requiredWaves: 5,
+        spawnPool: [10, 13, 16, 19],
+        minLevel: 3,
+        maxLevel: 5,
+        nextZones: ["Viridian Forest"]
+    },
+    "Viridian Forest": {
+        name: "Viridian Forest",
+        requiredWaves: 10,
+        spawnPool: [10, 11, 13, 14, 25],
+        minLevel: 3,
+        maxLevel: 6,
+        nextZones: ["Route 2-North"]
+    },
+    "Route 2-North": {
+        name: "Route 2",
+        requiredWaves: 5,
+        spawnPool: [10, 16, 19],
+        minLevel: 3,
+        maxLevel: 5,
+        nextZones: ["Pewter City"]
+    },
+    "Pewter City": {
+        name: "Pewter City",
+        requiredWaves: 1, /* Brock */
+        spawnPool: [],
+        nextZones: ["Route 3"]
+    },
+    "Route 3": {
+        name: "Route 3",
+        requiredWaves: 10,
+        spawnPool: [16, 21, 29, 32, 39, 56],
+        minLevel: 6,
+        maxLevel: 7,
+        nextZones: ["Mt. Moon"]
+    },
+    "Mt. Moon": {
+        name: "Mt. Moon",
+        requiredWaves: 10,
+        spawnPool: [39, 41, 46, 74],
+        minLevel: 5,
+        maxLevel: 12,
+        nextZones: ["Route 4"]
+    },
+    "Route 4": {
+        name: "Route 4",
+        requiredWaves: 10,
+        spawnPool: [16, 21, 23, 27, 56],
+        minLevel: 6,
+        maxLevel: 12,
+        nextZones: ["Cerulean City"]
+    },
+    "Cerulean City": {
+        name: "Cerulean City",
+        requiredWaves: 1, /* Misty */
+        spawnPool: [],
+        nextZones: ["Route 24", "Route, 9" /* Route 9 is locked untill Lt. Surge is beaten */, "Route 5, Cerulean Cave" /* Locked untill champion */]
+    },
+    "Route 24": {
+        name: "Route 24",
+        requiredWaves: 10,
+        spawnPool: [10, 11, 13, 14, 16, 43, 63, 69],
+        minLevel: 7,
+        maxLevel: 14,
+        nextZones: ["Route 25"]
+    },
+    "Route 25": {
+        name: "Route 25",
+        requiredWaves: 10,
+        spawnPool: [10, 11, 13, 14, 16, 43, 63, 69],
+        minLevel: 7,
+        maxLevel: 14,
+        nextZones: ["Cerulean City"]
+    },
+    "Route 5": {
+        name: "Route 5",
+        requiredWaves: 10,
+        spawnPool: [16, 43, 52, 69],
+        minLevel: 10,
+        maxLevel: 16,
+        nextZones: ["Route 6", "Saffron City" /* Saffron city is locked untill later */]
+    },
+    "Route 6": {
+        name: "Route 6",
+        requiredWaves: 10,
+        spawnPool: [16, 43, 52, 69],
+        minLevel: 10,
+        maxLevel: 16,
+        nextZones: ["Vermillion City"]
+    },
+    "Vermillion City": {
+        name: "Vermillion City",
+        requiredWaves: 1, /* Lt. Surge */
+        spawnPool: [],
+        nextZones: ["Route 11"]
+    },
+    "Route 11": {
+        name: "Route 11",
+        requiredWaves: 10,
+        spawnPool: [21, 23, 27, 96],
+        minLevel: 11,
+        maxLevel: 17,
+        nextZones: ["Diglets Tunnel", "Route 12", "Route 13" /* Route 12-13 is locked until player moves through Route 9 => 
+            Rock Tunnel => Route 10 => lavender town and beats Snolax */]
+    },
+    "Route 9": {
+        name: "Route 9",
+        requiredWaves: 10,
+        spawnPool: [19, 21, 23, 27],
+        minLevel: 11,
+        maxLevel: 17,
+        nextZones: ["Route 10-North"]
+    },
+    "Route 10-North": {
+        name: "Route 10",
+        requiredWaves: 5,
+        spawnPool: [21, 23, 27, 100],
+        minLevel: 11,
+        maxLevel: 17,
+        nextZones: ["Rock Tunnel", "Power Plant" /* Power Plant is locked untill after beating koga for 6th Badge */]
+    },
+    "Rock Tunnel": {
+        name: "Rock Tunnel",
+        requiredWaves: 10,
+        spawnPool: [41, 56, 66, 74, 95],
+        minLevel: 13,
+        maxLevel: 17,
+        nextZones: ["Route 10-South"]
+    },
+    "Power Plant": {
+        name: "Power Plant",
+        requiredWaves: 10,
+        spawnPool: [25, 81, 82, 100, 101, 125, 145],
+        minLevel: 22,
+        maxLevel: 50
+    },
+    "Route 10-South": {
+        name: "Route 10",
+        requiredWaves: 5,
+        spawnPool: [21, 23, 66, 100, ]
+    },
+    "Lavender Town": {
+        name: "Lavender Town",
+        requiredWaves: 0, /* pokemon Tower is its own area */
+        spawnPool: [],
+        nextZones: ["Pokemon Tower" /* Locked until defeating rocket game corner */, "Route 8", "Route 12"]
+    },
+    "Route 8": {
+        name: "Route 8",
+        requiredWaves: 10,
+        spawnPool: [16, 23, 27, 37, 52, 58],
+        minLevel: 15,
+        maxLevel: 20,
+        nextZones: ["Saffron City" /* Locked until beating rocket game corner */, "Route 7"]
+    },
+    "Route 7": {
+        name: "Route 7",
+        requiredWaves: 10,
+        spawnPool: [16, 37, 43, 52, 58, 69],
+        minLevel: 17,
+        maxLevel: 22,
+        nextZones: ["Celadon City"] 
+    },
+    "Celadon City": {
+        name: "Celadon City",
+        requiredWaves: 1, /* Erica */
+        spawnPool: [],
+        nextZones: ["Rocket Game Corner", "Route 16" /* Requires beating Snorlax which requires beating pokemon tower */]
+    },
+    "Rocket Game Corner": {
+        name: "Rocket Game Corner",
+        requiredWaves: 1,
+        spawnPool: []
+    },
+    "Pokemon Tower": { /* Unlocks fighting snorlax and silph co. */
+        name: "Pokémon Tower",
+        requiredWaves: 10,
+        spawnPool: [92, 93, 104],
+        minLevel: 13,
+        maxLevel: 25 
+    },
+    "Fighting Dojo": {
+        name: "Fighting Dojo",
+        requiredWaves: 1,
+        spawnPool: []
+    },
+    "Silph Co.": {
+        name: "Silph Co.",
+        requiredWaves: 1,
+        spawnPool: []
+    },
+    "Snorlax": {
+        name: "Snorlax",
+        requiredWaves: 1,
+        spawnPool: [143],
+        minLevel: 30,
+        maxLevel: 30
+    },
+    "Route 16": {
+        name: "Route 16",
+        requiredWaves: 10,
+        spawnPool: [19, 20, 21, 84],
+        minLevel: 18,
+        maxLevel: 25,
+        nextZones: ["Route 17"]
+    },
+    "Route 17": {
+        name: "Route 17",
+        requiredWaves: 10,
+        spawnPool: [19, 20, 21, 22, 84],
+        minLevel: 20,
+        maxLevel: 29,
+        nextZones: ["Route 18"]
+    },
+    "Route 18": {
+        name: "Route 18",
+        requiredWaves: 10,
+        spawnPool: [19, 20, 21, 22, 84],
+        minLevel: 20,
+        maxLevel: 29,
+        nextZones: ["Fuchia City"]
+    },
+    "Route 13": {
+        name: "Route 13",
+        requiredWaves: 10,
+        spawnPool: [16, 17, 43, 44, 48, 69, 70, 72, 83, 98, 116, 129, 132],
+        minLevel: 22,
+        maxLevel: 30,
+        nextZones: ["Route 14"]
+    },
+    "Route 14": {
+        name: "Route 14",
+        requiredWaves: 10,
+        spawnPool: [16, 17, 43, 44, 48, 69, 70, 132],
+        minLevel: 22,
+        maxLevel: 30,
+        nextZones: ["Route 15"]
+    },
+    "Route 15": {
+        name: "Route 15",
+        requiredWaves: 10,
+        spawnPool: [16, 17, 43, 44, 48, 69, 70, 132],
+        minLevel: 22,
+        maxLevel: 30,
+        nextZones: ["Fuchia City"]
+    },
+    "Fuchia City": {
+        name: "Fuchia City",
+        requiredWaves: 1, /* Koga */
+        spawnPool: [],
+        nextZones: ["Safari Zone", "Route 19"]
+    },
+    "Safari Zone": {
+        name: "Safari Zone",
+        requiredWaves: 10,
+        spawnPool: [29, 30, 32, 33, 46, 47, 48, 49, 54, 60, 79, 84, 102, 111, 113, 115, 118, 119, 123, 127, 128, 129, 147, 148],
+        minLevel: 20,
+        maxLevel: 40
+    },
+    "Route 19": {
+        name: "Route 19",
+        requiredWaves: 10,
+        spawnPool: [72, 98, 116, 129],
+        minLevel: 5,
+        maxLevel: 35,
+    },
+    "Seafoam Islands": {
+        name: "Seafoam Islands",
+        requiredWaves: 10,
+        spawnPool: [41, 42, 54, 55, 79, 80, 86, 98, 116, 129, 144],
+        minLevel: 22,
+        maxLevel: 50,
+        nextZones: ["Route 20"]
+    },
+    "Route 20": {
+        name: "Route 20",
+        requiredWaves: 10,
+        spawnPool: [72, 90, 98, 116, 120, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["Cinnabar Island"]
+    },
+    "Cinnabar Island": {
+        name: "Cinnabar Island",
+        requiredWaves: 1, /* Blaine */
+        spawnPool: [],
+        nextZones: ["Pokemon Mansion", "Route 21", "One Island"]
+    },
+    "Pokemon Mansion": {
+        name: "Pokémon Mansion",
+        requiredWaves: 10,
+        spawnPool: [19, 20, 37, 58, 88, 89, 109, 110, 132, 126],
+        minLevel: 26,
+        maxLevel: 38
+    },
+    "Route 21": {
+        name: "Route 21",
+        requiredWaves: 10,
+        spawnPool: [72, 90, 98, 114, 116, 120, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["Palet Town"]
+    },
+    "One Island": {
+        name: "One Island",
+        requiredWaves: 0,
+        spawnPool: [],
+        nextZones: ["Treasure Beach", "Kindle Road", "Two Island", "Three Island" /* Needs to have visited "Two Island" first */]
+    },
+    "Treasure Beach": {
+        name: "Treasure Beach",
+        requiredWaves: 10,
+        spawnPool: [21, 22, 52, 53, 54, 72, 73, 79, 98, 113, 116, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["one Island"]
+    },
+    "kindle Road": {
+        name: "Kindle Road",
+        requiredWaves: 10,
+        spawnPool: [21, 22, 52, 53, 54, 72, 73, 74, 77, 78, 79, 98, 116, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["one Island", "Mt. Ember"]
+    },
+    "Mt. Ember": {
+        name: "Mt. Ember",
+        requiredWaves: 10,
+        spawnPool: [19, 20, 66, 67, 74, 75, 77, 78, 126, 146],
+        minLevel: 5,
+        maxLevel: 50,
+        nextZones: ["One Island"]
+    },
+    "Two Island": {
+        name: "Two Island",
+        requiredWaves: 0,
+        spawnPool: [],
+        nextZones: ["One Island", "Cape Brink", "Three Island"]
+    },
+    "Cape Brink": {
+        name: "Cape Brink",
+        requiredWaves: 10,
+        spawnPool: [21, 22, 43, 44, 52, 53, 54, 55, 60, 69, 70, 79, 80, 118, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["two Island"]
+    },
+    "Three Island": {
+        name: "Three Island",
+        requiredWaves: 4, /* Biker gang */
+        spawnPool: [],
+        nextZones: ["One Island", "Two Island", "Bond Bridge" /* Needs biker gang to be beaten */]
+    },
+    "Bond Bridge": {
+        name: "Bond Bridge",
+        requiredWaves: 10,
+        spawnPool: [16, 17, 43, 44, 48, 52, 53, 54, 69, 70, 72, 73, 79, 98, 116, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["Berry Forest"]
+    },
+    "Berry Forest": {
+        name: "Berry Forest",
+        requiredWaves: 10,
+        spawnPool: [16, 17, 43, 44, 48, 49, 54, 55, 60, 69, 70, 79, 80, 96, 97, 102, 118, 129],
+        minLevel: 5,
+        maxLevel: 40,
+        nextZones: ["Three Island"]
+    },
+    "Route 23": {
+        name: "Route 23",
+        requiredWaves: 10,
+        spawnPool: [21, 22, 23, 24, 27, 28, 54, 56, 57, 60, 79, 118, 129],
+        minLevel: 20,
+        maxLevel: 45,
+        nextZones:["Victory Road"]
+    },
+    "Victory Road": {
+        name: "Victory Road",
+        requiredWaves: 10,
+        spawnPool: [24, 28, 41, 42, 57, 66, 67, 74, 95, 105],
+        minLevel: 32,
+        maxLevel: 48,
+        nextZones: ["Indigo Plateau"]
+    },
+    "Indigo Plateau": {
+        name: "Indigo Plateau",
+        requiredWaves: 5, /* 1: Lorelei, 2: Bruno, 3: Agatha, 4: Lance, 5: Blue */
+        spawnPool: [],
+        nextZones: ["Palet Town"]
+    }
+}
+
+function createUniqueInstances(apiTemplate, chosenLevel) {
+    const ivs = {
+        hp: Math.floor(Math.random() * 32),
+        attack: Math.floor(Math.random() * 32),
+        defense: Math.floor(Math.random() * 32),
+        specialAttack: Math.floor(Math.random() * 32),
+        specialDefense: Math.floor(Math.random() * 32),
+        speed: Math.floor(Math.random() * 32),
+    };
+
+    const natureList = object.Keys(natureData);
+    const randomNature = natureList[Math.floor(Math.random() * natureList.length)];
+
+    const nativeMoves = apiTemplate.moves.mp(m => ({
+        name: m.name,
+        power: m.power,
+        type: m.type,
+        damageClass: m.damageClass,
+        accuracy: m.accuracy,
+        maxPP: m.maxPP,
+        currentPP: m.maxPP
+    }));
+
+    return {
+        id: apiTemplate.id,
+        name: apiTemplate.name,
+        types: apiTemplate.types,
+        level: chosenLevel,
+        currentXP: 0,
+        baseStats: apiTemplate.baseStats,
+        ivs: ivs,
+        nature: randomNature,
+        moves: nativeMoves,
+        currentHP: null,
+        maxHP: null
+    };
 }
 
 function checkNewMovesForLevels(apiData, level) {
@@ -120,13 +615,13 @@ async function checkEvolution() {
 
                     isBattleActive = false;
 
-                    setTimeout(() => {
-                        const logElement = document.getElementById("log-text");
-                        if (logElement) {
-                            logElement.innerHTML = `what? ${playerPokemon.name.toUpperCase()} is evolving!<br>Do you want to allow it to evolve?`;
-                        }
-                        updateMenu("evolve");
-                    }, 2000);
+                    await sleep(1000);
+                    
+                    const logElement = document.getElementById("log-text");
+                    if (logElement) {
+                        logElement.innerHTML = `what? ${playerPokemon.name.toUpperCase()} is evolving!<br>Do you want to allow it to evolve?`;
+                    }
+                    updateMenu("evolve");
                 }
             }
         }
@@ -184,7 +679,7 @@ async function gainXP(amount) {
         playerPokemon.hp = playerPokemon.maxhp;
 
         if (logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} grew to level ${playerLevel}!`;
-
+        
         await checkAndLearnNewMove(playerLevel);
     }
 
@@ -219,6 +714,8 @@ async function checkAndLearnNewMove(newLevel) {
                 type: moveData.type.name,
                 damageClass: moveData.damage_class.name,
                 accuracy: moveData.accuracy !== null ? moveData.accuracy : 100,
+                maxPP: moveData.pp !== null ? moveData.pp : 35,
+                currentPP: moveData.pp !== null ? moveData.pp : 35,
                 statChange: moveData.stat_changes && moveData.stat_changes.length > 0 ? {
                     stat: moveData.stat_changes[0].stat.name,
                     change: moveData.stat_changes[0].change
@@ -467,6 +964,8 @@ async function getPokemonData(id) {
             type: moveData.type.name,
             damageClass: moveData.damage_class.name,
             accuracy: moveData.accuracy !== null ? moveData.accuracy : 100,
+            maxPP: moveData.PP !== null ?  moveData.pp : 35,
+            currentPP: moveData.PP !== null ? moveData.pp : 35,
             statChange: statChange,
             statusEffect: statusEffect
         };
@@ -499,57 +998,58 @@ function calculateDamage(attacker, defender, move) {
         const level = (attacker.name === playerPokemon.name) ? playerLevel : opponentLevel;
         const power = move.power || 40;
 
+        const isCrit = Math.random() < (1/24);
+
         let finalAttack = 0;
         let finalDefense = 0;
 
-        if (move.damageClass === "special") {
+        const attackerAttackStage = (attacker.name === playerPokemon.name) ? playerStats.attack : opponentStats.attack;
+        const attackerSpAtkStage = (attacker.name === playerPokemon.name) ? playerStats.specialAttack : opponentStats.specialAttack;
+        const defenderDefenseStage = (attacker.name === playerPokemon.name) ? playerStats.defense : opponentStats.defense;
+        const defenderSpDefStage = (attacker.name === playerPokemon.name) ? playerStats.specialDefense : opponentStats.specialDefense;
 
-            const attackerSpecialAttack = (attacker.name === playerPokemon.name)
-                ? attacker.specialAttack * getStageMultiplier(playerStats.specialAttack)
-                : attacker.specialAttack * getStageMultiplier(opponentStats.specialAttack);
+        let attackStageToUse = move.damageClass === "special" ? attackerSpAtkStage : attackerAttackStage;
+        let defenseStageToUse = move.damageClass === "special" ? defenderSpDefStage : defenderDefenseStage;
 
-            const defenderSpecialDefense = (defender.name === playerPokemon.name)
-                ? defender.specialDefense * getStageMultiplier(playerStats.specialDefense)
-                : defender.specialDefense * getStageMultiplier(opponentStats.specialDefense);
-
-                finalAttack = attackerSpecialAttack;
-                finalDefense = defenderSpecialDefense;
-        } else {
-
-            const attackerAttack = (attacker.name === playerPokemon.name)
-                ? attacker.attack * getStageMultiplier(playerStats.attack)
-                : attacker.attack * getStageMultiplier(opponentStats.attack);
-
-            const defenderDefense = (defender.name === playerPokemon.name)
-                ? defender.defense * getStageMultiplier(playerStats.defense)
-                : defender.defense * getStageMultiplier(opponentStats.defense);
-
-                finalAttack = attackerAttack;
-                finalDefense = defenderDefense;
+        if (isCrit) {
+            if (attackStageToUse < 0) attackStageToUse = 0;
+            if (defenseStageToUse > 0) defenseStageToUse = 0;
         }
+
+        finalAttack = move.damageClass === "special" ? attacker.specialAttack : attacker.attack;
+        finalDefense = move.damageClass === "special" ? defender.specialDefense : defender.defense;
+
+        finalAttack *= getStageMultiplier(attackStageToUse);
+        finalDefense *= getStageMultiplier(defenseStageToUse);
+
         const adratio = finalAttack / finalDefense;
 
         let damage = (((2 * level / 5 + 2) * power * adratio) / 50) + 2;
 
-        const stab = attacker.types.includes(move.type) ? 1.5 : 1;
+        if (attacker.types.includes(move.type)) {
+            damage * 1.5;
+        }
 
         let typeMultiplier = 1;
-        const moveType = move.type.toLowerCase();
 
-        defender.types.forEach(defenderType => {
-            const defType = defenderType.toLowerCase();
-
-            if (typeChart[moveType] && typeChart[moveType][defType] !== undefined) {
-                typeMultiplier *= typeChart[moveType][defType];
+        defender.types.forEach(defType => {
+            if (typeChart[move.type] && typeChart[move.type][defType] !== undefined) {
+                typeMultiplier *= typeChart[move.type][defType];
             }
         });
 
-
-        const randomFactor = Math.random() * (1.0 - 0.85) + 0.85;
-
         move.lastEffectiveness = typeMultiplier;
+        damage *= typeMultiplier;
 
-        return Math.floor(damage * stab * typeMultiplier * randomFactor)
+        if (isCrit) {
+            damage *= 1.5;
+            
+            move.lastHitWasCritical = true;
+        } else {
+            move.lastHitWasCritical = false;
+        }
+
+        return Math.floor(damage * (Math.random() * 0.15 + 0.85));
     }
 
 async function pokemonUpdate() {
@@ -719,6 +1219,10 @@ function handleMenuClick(buttonNumber) {
     else if (currentMenuState === "fight") {
         const chosenMove = playerPokemon.moves[buttonNumber - 1];
         if (chosenMove) {
+            if (chosenMove.currentPP <= 0) {
+                if (logElement) logElement.innerText = `Theres no PP left for this move!`;
+                return;
+            }
             executeTurn(chosenMove);
         }
     }
@@ -741,25 +1245,17 @@ function updateMenu(state) {
         if (backButton) backButton.style.display = "none";
     }
 
-    else if (state === "fight") {
-        button1.innerText = playerPokemon.moves[0] ? playerPokemon.moves[0].name.toUpperCase() : "-";
-        button2.innerText = playerPokemon.moves[1] ? playerPokemon.moves[1].name.toUpperCase() : "-";
-        button3.innerText = playerPokemon.moves[2] ? playerPokemon.moves[2].name.toUpperCase() : "-";
-        button4.innerText = playerPokemon.moves[3] ? playerPokemon.moves[3].name.toUpperCase() : "-";
+    else if (state === "fight" || "learn-move") {
+
+        const moves = playerPokemon.moves;
+
+        button1.innerText = playerPokemon.moves[0] ? `${playerPokemon.moves[0].name.toUpperCase()}\nPP: ${moves[0].currentPP}/${moves[0].maxPP}` : "-";
+        button2.innerText = playerPokemon.moves[1] ? `${playerPokemon.moves[1].name.toUpperCase()}\nPP: ${moves[1].currentPP}/${moves[1].maxPP}` : "-";
+        button3.innerText = playerPokemon.moves[2] ? `${playerPokemon.moves[2].name.toUpperCase()}\nPP: ${moves[2].currentPP}/${moves[2].maxPP}` : "-";
+        button4.innerText = playerPokemon.moves[3] ? `${playerPokemon.moves[3].name.toUpperCase()}\nPP: ${moves[3].currentPP}/${moves[3].maxPP}` : "-";
         if (backButton) {
             backButton.style.display = "inline-block"; 
-            backButton.innerText = "BACK";
-        }
-    }
-
-    else if (state === "learn-move") {
-        button1.innerText = playerPokemon.moves[0] ? playerPokemon.moves[0].name.toUpperCase() : "-";
-        button2.innerText = playerPokemon.moves[1] ? playerPokemon.moves[1].name.toUpperCase() : "-";
-        button3.innerText = playerPokemon.moves[2] ? playerPokemon.moves[2].name.toUpperCase() : "-";
-        button4.innerText = playerPokemon.moves[3] ? playerPokemon.moves[3].name.toUpperCase() : "-";
-        if (backButton) {
-            backButton.innerText = "DONT LEARN";
-            backButton.style.display = "inline-block";
+            backButton.innerText = state === "fight" ? "BACK" : "DONT LEARN";
         }
     }
 
@@ -787,6 +1283,10 @@ function handleBackClick() {
 
         isLearningMove = false;
         moveToLearn = null;
+
+        if(window.resolveMoveLearning) {
+            resolveMoveLearning();
+        }
         
         updateMenu("main");
     }
@@ -801,11 +1301,15 @@ function handleBackClick() {
     }
 }
 
-function executeTurn(playerMove) {
+async function executeTurn(playerMove) {
 
     isPlayerTurn = false;
 
     const logElement = document.getElementById("log-text");
+
+    playerMove.currentPP = Math.max(0, playerMove.currentPP - 1);
+
+    updateMenu("fight");
 
     const playerSpeed = playerPokemon.speed * getStageMultiplier(playerStats.speed);
     const opponentSpeed = opponentPokemon.speed * getStageMultiplier(opponentStats.speed);
@@ -820,26 +1324,26 @@ function executeTurn(playerMove) {
             }
         }
 
-        setTimeout(() => {
-            if (opponentPokemon.hp > 0) {
-                if (canPokemonAttack(opponentPokemon, false)) {
-                    if (checkMoveHit(opponentMove, opponentPokemon.name)) {
-                        doOpponentAttack(opponentMove);
-                    }
+        await sleep(1000);
+        
+        if (opponentPokemon.hp > 0) {
+            if (canPokemonAttack(opponentPokemon, false)) {
+                if (checkMoveHit(opponentMove, opponentPokemon.name)) {
+                    doOpponentAttack(opponentMove);
                 }
-
-                setTimeout(() => {
-                    if (playerPokemon.hp > 0) {
-                        const keepFighting = applyEndResultDamage();
-                        if (keepFighting) {
-                            if (logElement) logElement.innerText = `What will ${playerPokemon.name.toUpperCase()} do?`;
-                            updateMenu("main");
-                            isPlayerTurn = true;
-                        }
-                    }
-                }, 1000);
             }
-        }, 1000);
+        }
+
+        await sleep(1000);
+        if (playerPokemon.hp > 0) {
+            const keepFighting = await applyEndResultDamage();
+            if (keepFighting) {
+                if (logElement) logElement.innerText = `What will ${playerPokemon.name.toUpperCase()} do?`;
+                updateMenu("main");
+                isPlayerTurn = true;
+            }
+        }
+            
     } else {
         if (canPokemonAttack(opponentPokemon, false)) {
             if (checkMoveHit(opponentMove, opponentPokemon.name)) {
@@ -847,27 +1351,44 @@ function executeTurn(playerMove) {
             }
         }
 
-        setTimeout(() => {
-            if (playerPokemon.hp > 0) {
-                if (canPokemonAttack(playerPokemon, true)) {
-                    if (checkMoveHit(playerMove, playerPokemon.name)) {
-                        doPlayerAttack(playerMove);
-                    }
+        await sleep(1000);
+        if (playerPokemon.hp > 0) {
+            if (canPokemonAttack(playerPokemon, true)) {
+                if (checkMoveHit(playerMove, playerPokemon.name)) {
+                    doPlayerAttack(playerMove);
                 }
-
-                setTimeout(() => {
-                    if (opponentPokemon.hp > 0) {
-                        const keepFighting = applyEndResultDamage();
-                        if (keepFighting) {
-                            if (logElement) logElement.innerText = `what will ${playerPokemon.name.toUpperCase()} do?`;
-                            updateMenu("main");
-                            isPlayerTurn = true;
-                        }
-                    }
-                }, 1000);
             }
-        }, 1000);
+
+            await sleep(1000);
+        }
     }    
+
+    if (isBattleActive) {
+        if (playerPokemon.hp <= 0) {
+            if (logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} fainted...`;
+            await sleep(1000);
+            endBattle();
+            return;
+        }
+        if (opponentPokemon.hp <= 0) {
+            if (logElement) logElement.innerHTML = `Foe ${opponentPokemon.name.toUpperCase()} fainted!`;
+            await sleep(1000);
+
+            if (!pokedexList.includes(opponentPokemon.id)) pokedexList.push(opponentPokemon.id);
+            const xpGained = opponentLevel * 25;
+            await gainXP(xpGained);
+
+            if (!isEvolving && !isLearningMove) endBattle();
+            return;
+        }
+
+        const keepFighting = await applyEndResultDamage();
+        if (keepFighting && isBattleActive && !isLearningMove && !isEvolving) {
+            if (logElement) logElement.innerText = `What will ${playerPokemon.name.toUpperCase()} do?`;
+            updateMenu("main");
+            isPlayerTurn = true;
+        }
+    }
 }
 
 async function executeEvolution() {
@@ -917,7 +1438,9 @@ async function executeEvolution() {
                 name: moveData.name,
                 power: moveData.power,
                 accuracy: moveData.accuracy || 100,
-                damageClass: moveData.damage_class,
+                maxPP: moveData.pp !== null ? moveData.pp : 35,
+                currentPP: moveData.pp !== null ? moveData.pp : 35,
+                damageClass: moveData.damage_class.name,
                 statChange: moveData.stat_changes && moveData.stat_changes.length > 0 ? {
                     change: moveData.stat_changes[0].change,
                     stat: moveData.stat_changes[0].stat.name
@@ -971,37 +1494,21 @@ function doPlayerAttack(playerMove) {
             logElement.innerHTML = `${playerPokemon.name.toUpperCase()} used ${playerMove.name.toUpperCase()}!${statText}`;
         }
     } else {
-
         let damageToOpponent = calculateDamage(playerPokemon, opponentPokemon, playerMove);
         opponentPokemon.hp = Math.max(0, opponentPokemon.hp - damageToOpponent);
 
         let opponentHpProcent = (opponentPokemon.hp / opponentPokemon.maxhp) * 100;
         document.getElementById("opponent-hp-fill").style.width = `${opponentHpProcent}%`;
 
-        if (opponentPokemon.hp > 0) {
-            statusText = tryApplyStatus(playerMove, opponentPokemon);
-        }
+        if (opponentPokemon.hp > 0) statusText = tryApplyStatus(playerMove, opponentPokemon);
 
         let effectivenessText = "";
         if (playerMove.lastEffectiveness > 1) effectivenessText = `<br>It's super effective!`;
         if (playerMove.lastEffectiveness < 1) effectivenessText = `<br>It's not very effective...`;
         if (playerMove.lastEffectiveness === 0) effectivenessText = `<br>It has no effect...`;
 
-        if (logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} used ${playerMove.name.toUpperCase()}!${effectivenessText}`
-    }
-
-    if (opponentPokemon.hp <= 0) {
-        if (!pokedexList.includes(opponentPokemon.id)) {
-            pokedexList.push(opponentPokemon.id);
-        }
-
-        const xpGained = opponentLevel * 25;
-        gainXP(xpGained);
-
-        setTimeout(() => {
-            logElement.innerText = `Foe ${opponentPokemon.name.toUpperCase()} fainted!`;
-            endBattle();
-        }, 1000);
+        let critText = playerMove.lastHitWasCritical ? `<br>A critical hit!` : "";
+        if (logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} used ${playerMove.name.toUpperCase()}!${critText}${effectivenessText}`
     }
 }
 
@@ -1046,14 +1553,8 @@ function doOpponentAttack(opponentMove) {
         if (opponentMove.lastEffectiveness < 1) opponentEffectivenessText = `<br>It's not very effective...`;
         if (opponentMove.lastEffectiveness === 0) opponentEffectivenessText = `<br>It has no effect...`;
 
-
-        if (logElement) logElement.innerHTML = `Foe ${opponentPokemon.name.toUpperCase()} used ${opponentMove.name.toUpperCase()}!${opponentEffectivenessText}`;
-    }
-    if (playerPokemon.hp <= 0) {
-        setTimeout(() => {
-            logElement.innerHTML = `${playerPokemon.name.toUpperCase()} fainted...`;
-            endBattle();
-        }, 1000);
+        let critText = opponentMove.lastHitWasCritical ? `<br>A critical hit!` : "";
+        if (logElement) logElement.innerHTML = `Foe ${opponentPokemon.name.toUpperCase()} used ${opponentMove.name.toUpperCase()}!${critText}${opponentEffectivenessText}${statusText}`;
     }
 }
 
@@ -1159,24 +1660,10 @@ async function applyEndResultDamage() {
 
     if (extraLog !== "" && logElement) {
         logElement.innerHTML += extraLog;
+        await sleep (1000);
     }
 
     if (playerPokemon.hp <= 0 || opponentPokemon.hp <= 0) {
-        setTimeout(() => {
-            if (playerPokemon.hp <= 0 && logElement) logElement.innerHTML = `${playerPokemon.name.toUpperCase()} fainted...`;
-            if (opponentPokemon.hp <= 0 && logElement) {
-                if (!pokedexList.includes(opponentPokemon.id)) {
-                    pokedexList.push(opponentPokemon.id);
-                }
-
-                const xpGained = opponentLevel * 25;
-                gainXP(xpGained);
-
-                logElement.innerHTML = `${opponentPokemon.name.toUpperCase()} fainted!`;
-            } 
-
-            endBattle();
-        }, 1000);
         return false;
     }
     return true;
@@ -1186,6 +1673,7 @@ function endBattle() {
     isBattleActive = false;
     isPlayerTurn = true;
     currentMenuState = "start";
+    if (playerPokemon) playerPokemon.status = "none";
 
     const logElement = document.getElementById("log-text");
     if (logElement) logElement.innerText = "Battle over! you can click on OPEN POKEDEX to swap your Pokemon"
