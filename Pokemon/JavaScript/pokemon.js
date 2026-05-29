@@ -4,7 +4,7 @@ let KantoPokedex = [];
 let playerParty = [];
 let currentPartyIndex = 0;
 
-let playerPokemon = {};
+let playerPokemon;
 let opponentPokemon = {};
 
 let currentMenuState = "start";
@@ -14,7 +14,7 @@ let isPlayerTurn = true;
 let isLearningMove = false;
 let moveToLearn = null;
 
-let encouterpool = [16, 19, 10, 13, 21, 29, 32];
+let encounterpool = [16, 19, 10, 13, 21, 29, 32];
 
 let playerLevel = 5;
 let playerXP = 0;
@@ -22,13 +22,10 @@ let xpNeededForLevel = 100;
 
 let isEvolving = false;
 let evolutionIDTarget = null;
-let evolutionTargetName = "";
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const levelOffSet = Math.floor(Math.random() * 3) - 1;
-
-let opponentLevel = Math.max(2, playerLevel + levelOffSet);
+let opponentLevel = 2;
 
 let playerStats = {
     attack: 0,
@@ -529,31 +526,35 @@ function createUniqueInstances(apiTemplate, chosenLevel) {
         speed: Math.floor(Math.random() * 32),
     };
 
-    const natureList = object.Keys(natureData);
+    const natureList = Object.keys(natureData);
     const randomNature = natureList[Math.floor(Math.random() * natureList.length)];
 
-    const nativeMoves = apiTemplate.moves.mp(m => ({
-        name: m.name,
-        power: m.power,
-        type: m.type,
-        damageClass: m.damageClass,
-        accuracy: m.accuracy,
-        maxPP: m.maxPP,
-        currentPP: m.maxPP
-    }));
+    const nativeMoves = apiTemplate.moves || [];
+    const templateStats = apiTemplate.baseStats || apiTemplate.stats || [];
 
     return {
         id: apiTemplate.id,
         name: apiTemplate.name,
+        spriteFront: apiTemplate.sprites?.front_default || `https://raw.githubusercontent.com/pokeAPI/sprites/master/sprites/pokemon/front/${apiTemplate.id}.png`,
+        spriteBack: apiTemplate.sprites?.back_default || `https://raw.githubusercontent.com/pokeAPI/sprites/master/sprites/pokemon/back/${apiTemplate.id}.png`,
         types: apiTemplate.types,
         level: chosenLevel,
         currentXP: 0,
-        baseStats: apiTemplate.baseStats,
+        baseStats: {
+            hp: templateStats.hp || templateStats?.[0]?.base_stat || 50,
+            attack: templateStats.attack || templateStats?.[1]?.base_stat || 50,
+            defense: templateStats.defense || templateStats?.[2]?.base_stat || 50,
+            specialAttack: templateStats.specialAttack || templateStats?.[3]?.base_stat || 50,
+            specialDefense: templateStats.specialDefense || templateStats?.[4]?.base_stat || 50,
+            speed: templateStats.speed || templateStats?.[5]?.base_stat || 50
+        },
         ivs: ivs,
         nature: randomNature,
         moves: nativeMoves,
         currentHP: null,
-        maxHP: null
+        maxHP: null,
+        hp: null,
+        maxhp: null
     };
 }
 
@@ -638,8 +639,11 @@ function updatePlayerUI() {
     document.getElementById("player-level").innerText = playerLevel;
     document.getElementById("player-sprite").src = playerPokemon.spriteBack;
 
-    document.getElementById("player-hp-text").innerText = `${playerPokemon.hp}/${playerPokemon.maxhp}`;
-    let playerHpProcent = (playerPokemon.hp / playerPokemon.maxhp) * 100;
+    const displayHP = typeof playerPokemon.hp === "number" ? playerPokemon.hp : playerPokemon.currentHP;
+    const displayMaxHP = typeof playerPokemon.maxhp === "number" ? playerPokemon.maxhp : playerPokemon.maxHP;
+
+    document.getElementById("player-hp-text").innerText = `${displayHP}/${displayMaxHP}`;
+    let playerHpProcent = (displayHP / displayMaxHP) * 100;
     document.getElementById("player-hp-fill").style.width = `${playerHpProcent}%`;
 
     updateStatusUI();
@@ -760,12 +764,24 @@ async function chooseStarter(starterId) {
     const logElement = document.getElementById("log-text");
     if (logElement) logElement.innerText = "Loading your partner...";
 
-    playerPokemon = await getPokemonData(starterId);
+    const apiTemplate = await getPokemonData(starterId);
 
+    const uniqueStarter = createUniqueInstances(apiTemplate, 5);
+    reCalculateInstanceStats(uniqueStarter);
 
     if (!pokedexList.includes(starterId)) {
         pokedexList.push(starterId);
     }
+
+    playerParty = [uniqueStarter];
+
+    currentPartyIndex = 0;
+
+    playerPokemon = playerParty[currentPartyIndex];
+
+    playerLevel = playerPokemon.level;
+
+    uniqueStarter.moves = apiTemplate.moves || [];
 
     const startOverlay = document.getElementById("start-menu");
     if (startOverlay)  { 
@@ -799,11 +815,20 @@ async function startNewBattle() {
     const levelOffSet = Math.floor(Math.random() * 3) - 1;
     opponentLevel = Math.max(2, playerLevel + levelOffSet);
 
-    const randomIndex = Math.floor(Math.random() * encouterpool.length);
-    const randomOpponent = encouterpool[randomIndex];
+    const randomIndex = Math.floor(Math.random() * encounterpool.length);
+    const randomOpponent = encounterpool[randomIndex];
 
     opponentPokemon = await getPokemonData(randomOpponent);
+    opponentPokemon.level = opponentLevel;
+    reCalculateInstanceStats(opponentPokemon);
     opponentPokemon.hp = opponentPokemon.maxhp;
+    opponentPokemon.currentHP = opponentPokemon.maxHP;
+
+    playerPokemon.hp = playerPokemon.maxhp;
+    playerPokemon.currentHP = playerPokemon.maxHP;
+
+    document.getElementById("player-hp-fill").style.backgroundColor = "#4CAF50";
+    document.getElementById("opponent-hp-fill").style.backgroundColor = "#4CAF50";
 
     updatePlayerUI();
 
@@ -816,6 +841,41 @@ async function startNewBattle() {
     if (logElement) logElement.innerHTML = `A wild ${opponentPokemon.name.toUpperCase()} appeared!<br>What will ${playerPokemon.name.toUpperCase()} do?`;
 
     updateMenu("main");
+}
+
+function reCalculateInstanceStats(pokemonInstance) {
+    if (!pokemonInstance) return;
+
+    const level = pokemonInstance.level;
+    const base = pokemonInstance.baseStats;
+    const iv = pokemonInstance.ivs;
+    const natureName = pokemonInstance.nature;
+    const natureEffect = natureData[natureName];
+
+    const baseHP = base?.hp || pokemonInstance.stats?.[0]?.base_stat || 40;
+
+    const calculatedHP = Math.floor(((2 * base.hp + (iv?.hp || 0)) * level) / 100) + level + 10;
+    pokemonInstance.maxHP = calculatedHP;
+    pokemonInstance.maxhp = calculatedHP;
+
+    if (pokemonInstance.currentHP === null) {
+        pokemonInstance.currentHP = pokemonInstance.maxHP;
+    }
+    pokemonInstance.hp = pokemonInstance.currentHP;
+
+    const coreStats = ["attack", "defense", "specialAttack", "specialDefense", "speed"];
+
+    coreStats.forEach(statKey => {
+        let calculateValue = Math.floor(((2 * base[statKey] + iv[statKey]) * level) / 100) + 5;
+
+        if (natureEffect.plus === statKey) {
+            calculateValue = Math.floor(calculateValue * 1.1);
+        } else if (natureEffect.minus === statKey) {
+            calculateValue = Math.floor(calculateValue * 0.9);
+        }
+
+        pokemonInstance[statKey] = calculateValue;
+    });
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -854,16 +914,28 @@ function renderPokedex() {
         if (hasCaught) {
             card.className = "pokedex-card caught";
             card.innerHTML = `
-            <span class="pokedex-number">#${formattedId}</span>
-            <img class="pokedex-sprite" src="${pokemon.sprite}" alt="${pokemon.name}">
-            <div class="pokedex-name">${pokemon.name.toUpperCase()}</div>
+                <span class="pokedex-number">#${formattedId}</span>
+                <img class="pokedex-sprite" src="${pokemon.sprite}" alt="${pokemon.name}">
+                <div class="pokedex-name">${pokemon.name.toUpperCase()}</div>
             `;
 
             card.onclick = async () => {
                 const logElement = document.getElementById("log-text");
                 if (logElement) logElement.innerText = `Loading ${pokemon.name.toUpperCase()}...`;
                 
-                playerPokemon = await getPokemonData(pokemon.id);
+                const apiTemplate = await getPokemonData(pokemon.id);
+                if (!apiTemplate) {
+                    if (logElement) logElement.innerText = "Error loading Pokemon data.";
+                    return;
+                }
+
+                const instancePool = createUniqueInstances(apiTemplate, 5);
+                const uniqueStarter = Array.isArray(instancePool) ? instancePool[0] : instancePool;
+
+                reCalculateInstanceStats(uniqueStarter);
+
+                playerParty = [uniqueStarter];
+                playerPokemon = uniqueStarter;
 
                 updatePlayerUI();
 
@@ -876,7 +948,7 @@ function renderPokedex() {
                     isPlayerTurn = false;
                     updateMenu("main");
 
-                    setTimeout(() => {
+                    setTimeout(async () => {
                         if (!isBattleActive) return;
 
                         const randomIndex = Math.floor(Math.random() * opponentPokemon.moves.length);
@@ -888,10 +960,10 @@ function renderPokedex() {
                             }
                         }
 
-                        setTimeout(() => {
+                        setTimeout(async () => {
                             if (!isBattleActive || playerPokemon.hp <= 0 || opponentPokemon.hp <= 0) return;
 
-                            const keepFighting = applyEndResultDamage();
+                            const keepFighting = await applyEndResultDamage();
 
                             if (keepFighting && isBattleActive) {
                                 if (logElement) logElement.innerText = `What will ${playerPokemon.name.toUpperCase()} do?`;
@@ -926,14 +998,18 @@ async function getPokemonData(id) {
     const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`)
     const data = await response.json();
 
+    const currentLevel = typeof playerLevel !== `undefined` ? playerLevel : 5;
+
     const playerLevelMoves = data.moves.filter(m => {
         return m.version_group_details.some(detail =>
             detail.move_learn_method.name === "level-up" &&
             detail.level_learned_at <= playerLevel
         );
-     });
+    });
+
+    const movesToFetch = playerLevelMoves.length > 0 ? playerLevelMoves.slice(0, 4) : data.moves.slice(0, 4);
      
-     const movePromises = playerLevelMoves.slice(0, 4).map(async (m) => {
+    const movePromises = movesToFetch.map(async (m) => {
         const moveResponse = await fetch(m.move.url);
         const moveData = await moveResponse.json();
 
@@ -964,18 +1040,41 @@ async function getPokemonData(id) {
             type: moveData.type.name,
             damageClass: moveData.damage_class.name,
             accuracy: moveData.accuracy !== null ? moveData.accuracy : 100,
-            maxPP: moveData.PP !== null ?  moveData.pp : 35,
-            currentPP: moveData.PP !== null ? moveData.pp : 35,
+            maxPP: moveData.pp !== null ?  moveData.pp : 35,
+            currentPP: moveData.pp !== null ? moveData.pp : 35,
             statChange: statChange,
             statusEffect: statusEffect
         };
     });
+
+    const ivs = {
+        hp: Math.floor(Math.random() * 32),
+        attack: Math.floor(Math.random() * 32),
+        defense: Math.floor(Math.random() * 32),
+        specialAttack: Math.floor(Math.random() * 32),
+        specialDefense: Math.floor(Math.random() * 32),
+        speed: Math.floor(Math.random() * 32)
+    };
+
+    const natureKeys = Object.keys(natureData);
+    const randomNature = natureKeys[Math.floor(Math.random() * natureKeys.length)];
 
     const detailedMoves = await Promise.all(movePromises);
 
     return {
         id: data.id,
         name: data.name,
+        level: currentLevel,
+        baseStats: {
+            hp: data.stats[0].base_stat,
+            attack: data.stats[1].base_stat,
+            defense: data.stats[2].base_stat,
+            specialAttack: data.stats[3].base_stat,
+            specialDefense: data.stats[4].base_stat,
+            speed: data.stats[5].base_stat
+        },
+        ivs: ivs,
+        nature: randomNature,
         hp: data.stats[0].base_stat,
         maxhp: data.stats[0].base_stat,
         attack: data.stats[1].base_stat,
@@ -1005,8 +1104,8 @@ function calculateDamage(attacker, defender, move) {
 
         const attackerAttackStage = (attacker.name === playerPokemon.name) ? playerStats.attack : opponentStats.attack;
         const attackerSpAtkStage = (attacker.name === playerPokemon.name) ? playerStats.specialAttack : opponentStats.specialAttack;
-        const defenderDefenseStage = (attacker.name === playerPokemon.name) ? playerStats.defense : opponentStats.defense;
-        const defenderSpDefStage = (attacker.name === playerPokemon.name) ? playerStats.specialDefense : opponentStats.specialDefense;
+        const defenderDefenseStage = (defender.name === playerPokemon.name) ? playerStats.defense : opponentStats.defense;
+        const defenderSpDefStage = (defender.name === playerPokemon.name) ? playerStats.specialDefense : opponentStats.specialDefense;
 
         let attackStageToUse = move.damageClass === "special" ? attackerSpAtkStage : attackerAttackStage;
         let defenseStageToUse = move.damageClass === "special" ? defenderSpDefStage : defenderDefenseStage;
@@ -1027,7 +1126,7 @@ function calculateDamage(attacker, defender, move) {
         let damage = (((2 * level / 5 + 2) * power * adratio) / 50) + 2;
 
         if (attacker.types.includes(move.type)) {
-            damage * 1.5;
+            damage *= 1.5;
         }
 
         let typeMultiplier = 1;
@@ -1050,7 +1149,7 @@ function calculateDamage(attacker, defender, move) {
         }
 
         return Math.floor(damage * (Math.random() * 0.15 + 0.85));
-    }
+}
 
 async function pokemonUpdate() {
     const logElement = document.getElementById("log-text");
@@ -1063,12 +1162,17 @@ async function pokemonUpdate() {
     const levelOffSet = Math.floor(Math.random() * 3) - 1;
     opponentLevel = Math.max(2, playerLevel + levelOffSet);
 
-    const randomIndex = Math.floor(Math.random() * encouterpool.length);
-    const randomOpponent = encouterpool[randomIndex];
+    const randomIndex = Math.floor(Math.random() * encounterpool.length);
+    const randomOpponent = encounterpool[randomIndex];
 
     opponentPokemon = await getPokemonData(randomOpponent);
+    opponentPokemon.level = opponentLevel;
+    reCalculateInstanceStats(opponentPokemon);
+    opponentPokemon.hp = opponentPokemon.maxhp;
+    opponentPokemon.currentHP = opponentPokemon.maxHP;
 
     playerPokemon.hp = playerPokemon.maxhp;
+    playerPokemon.currentHP = playerPokemon.maxHP;
     playerStats.attack = 0;
     playerStats.defense = 0;
     playerStats.specialAttack = 0;
@@ -1245,7 +1349,7 @@ function updateMenu(state) {
         if (backButton) backButton.style.display = "none";
     }
 
-    else if (state === "fight" || "learn-move") {
+    else if (state === "fight" || state === "learn-move") {
 
         const moves = playerPokemon.moves;
 
@@ -1295,7 +1399,6 @@ function handleBackClick() {
 
         isEvolving = false;
         evolutionIDTarget = null;
-        evolutionTargetName = "";
 
         updateMenu("main");
     }
@@ -1406,23 +1509,20 @@ async function executeEvolution() {
     playerPokemon.spriteBack = data.sprites.back_default;
     playerPokemon.types = data.types.map(t => t.type.name);
 
-    playerPokemon.maxhp = data.stats[0].base_stat;
-    playerPokemon.attack = data.stats[1].base_stat;
-    playerPokemon.defense = data.stats[2].base_stat;
-    playerPokemon.specialAttack = data.stats[3].base_stat;
-    playerPokemon.specialDefense = data.stats[4].base_stat;
-    playerPokemon.speed = data.stats[5].base_stat
+    playerPokemon.baseStats = {
+        hp: data.stats[0].base_stat,
+        attack: data.stats[1].base_stat,
+        defense: data.stats[2].base_stat,
+        specialAttack: data.stats[3].base_stat,
+        specialDefense: data.stats[4].base_stat,
+        speed: data.stats[5].base_stat
+    };
 
-    for (let i = 5; i < playerLevel; i++) {
-        playerPokemon.maxhp = Math.floor(playerPokemon.maxhp * 1.1);
-        playerPokemon.attack = Math.floor(playerPokemon.attack * 1.1);
-        playerPokemon.defense = Math.floor(playerPokemon.defense * 1.1);
-        playerPokemon.specialAttack = Math.floor(playerPokemon.specialAttack * 1.1);
-        playerPokemon.specialDefense = Math.floor(playerPokemon.specialDefense * 1.1);
-        playerPokemon.speed = Math.floor(playerPokemon.speed * 1.1);
-    }
+    playerPokemon.level = playerLevel;
 
-    playerPokemon.hp = playerPokemon.maxhp;
+    reCalculateInstanceStats(playerPokemon);
+    playerPokemon.currentHP = playerPokemon.maxHP;
+    playerPokemon.hp = playerPokemon.maxHP;
     playerPokemon.moves = currentMoves;
 
     const evolutionMoves = checkNewMovesForLevels(data, playerLevel);
@@ -1498,7 +1598,17 @@ function doPlayerAttack(playerMove) {
         opponentPokemon.hp = Math.max(0, opponentPokemon.hp - damageToOpponent);
 
         let opponentHpProcent = (opponentPokemon.hp / opponentPokemon.maxhp) * 100;
-        document.getElementById("opponent-hp-fill").style.width = `${opponentHpProcent}%`;
+
+        if (opponentHpProcent > 50) {
+            document.getElementById("opponent-hp-fill").style.width = `${opponentHpProcent}%`;
+            document.getElementById("opponent-hp-fill").style.backgroundColor = "#4caf50";
+        } else if (opponentHpProcent < 50 && opponentHpProcent > 20) {
+            document.getElementById("opponent-hp-fill").style.width = `${opponentHpProcent}%`;
+            document.getElementById("opponent-hp-fill").style.backgroundColor = "#ff9800";
+        } else {
+            document.getElementById("opponent-hp-fill").style.width = `${opponentHpProcent}%`;
+            document.getElementById("opponent-hp-fill").style.backgroundColor = "#f44336";
+        }
 
         if (opponentPokemon.hp > 0) statusText = tryApplyStatus(playerMove, opponentPokemon);
 
@@ -1542,7 +1652,17 @@ function doOpponentAttack(opponentMove) {
 
         document.getElementById("player-hp-text").innerHTML = `${playerPokemon.hp}/${playerPokemon.maxhp}`;
         let playerHpProcent = (playerPokemon.hp / playerPokemon.maxhp) * 100;
-        document.getElementById("player-hp-fill").style.width = `${playerHpProcent}%`;
+        
+        if (playerHpProcent > 50) {
+            document.getElementById("player-hp-fill").style.width = `${playerHpProcent}%`;
+            document.getElementById("player-hp-fill").style.backgroundColor = "#4caf50";
+        } else if (playerHpProcent < 50 && playerHpProcent > 20) {
+            document.getElementById("player-hp-fill").style.width = `${playerHpProcent}%`;
+            document.getElementById("player-hp-fill").style.backgroundColor = "#ff9800";
+        } else {
+            document.getElementById("player-hp-fill").style.width = `${playerHpProcent}%`;
+            document.getElementById("player-hp-fill").style.backgroundColor = "#f44336";
+        }
 
         if (opponentPokemon.hp > 0) {
             statusText = tryApplyStatus(opponentMove, playerPokemon)
@@ -1673,7 +1793,16 @@ function endBattle() {
     isBattleActive = false;
     isPlayerTurn = true;
     currentMenuState = "start";
-    if (playerPokemon) playerPokemon.status = "none";
+    if (playerPokemon) {
+        playerPokemon.status = "none";
+        if (Array.isArray(playerPokemon.moves)) {
+            playerPokemon.moves.forEach(move => {
+                if (move && typeof move.maxPP === "number") {
+                    move.currentPP = move.maxPP;
+                }
+            });
+        }
+    }
 
     const logElement = document.getElementById("log-text");
     if (logElement) logElement.innerText = "Battle over! you can click on OPEN POKEDEX to swap your Pokemon"
