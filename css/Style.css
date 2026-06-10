@@ -89,13 +89,13 @@ body {background-color: #555}
 .co-skills{
     flex: 1;
     padding: 20px;
-    padding-top: 8px;
+    padding-top: 7px;
 }
 
 .co-contact{
     flex: 1;
     padding: 20px;
-    padding-top: 8px;
+    padding-top: 7px;
 }
 
 footer {background-color: #555;}
