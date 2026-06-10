@@ -1,3 +1,6 @@
+document.getElementById("currentYear").innerText = new Date().getFullYear();
+ageCalculator("2008-10-16", "DanielAge");
+
 function ageCalculator(birth, id) {
     var dob = new Date(birth);
 
@@ -12,6 +15,3 @@ function ageCalculator(birth, id) {
     const element = document.getElementById(id);
     element.innerText = age;
 }
-
-document.getElementById("currentYear").innerText = new Date().getFullYear();
-ageCalculator("2008-10-16", "DanielAge");
