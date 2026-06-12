@@ -1,5 +1,4 @@
 header {
-    background-color: #555;
     position: relative;
     padding: 20px 0;
     padding-bottom: 0;
@@ -7,10 +6,10 @@ header {
 
 header h1 {
     text-align: center;
-    color: white;
 }
 
 .header-right {
+    display: flex;
     position: absolute;
     top: 25px;
     right: 5%;
@@ -46,16 +45,13 @@ nav li a:hover {background-color: #202020;}
 
 .link {background-color: #404040;}
 
-body {background-color: #555}
-
-.container{
+.my-portfolio-container{
     display: flex;
     gap: 40px;
     max-width: 1400px;
     box-sizing: border-box;
     width: 90%;
     margin: auto;
-    background-color: whitesmoke;
     padding: 20px;
 }
 
@@ -98,9 +94,6 @@ body {background-color: #555}
     padding-top: 7px;
 }
 
-footer {background-color: #555;}
-
 footer h4{
     text-align: center;
-    color: white;
 }
