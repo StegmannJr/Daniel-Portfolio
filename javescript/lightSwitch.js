@@ -8,6 +8,41 @@
         document.body.classList.remove("bg-light", "text-dark");
         document.body.classList.add("bg-dark", "text-light");
 
+        let hactive = document.getElementById("Header Navigation active");
+        let hlink1 = document.getElementById("Header Navigation link 1");
+        let hlink2 = document.getElementById("Header Navigation link 2");
+
+        let factive = document.getElementById("Footer Navigation active");
+        let flink1 = document.getElementById("Footer Navigation link 1");
+        let flink2 = document.getElementById("Footer Navigation link 2");
+
+        let hhover = document.getElementById("Header Navigation hover");
+        let fhover = document.getElementById("Footer Navigation hover");
+
+        hhover.classList.remove("nav-hover-light");
+        hhover.classList.add("nav-hover-dark");
+
+        fhover.classList.remove("nav-hover-light");
+        fhover.classList.add("nav-hover-dark");
+
+        hactive.classList.remove("nav-active-light");
+        hactive.classList.add("nav-active-dark");
+
+        hlink1.classList.remove("nav-link-light");
+        hlink1.classList.add("nav-link-dark");
+
+        hlink2.classList.remove("nav-link-light");
+        hlink2.classList.add("nav-link-dark");
+
+        factive.classList.remove("nav-active-light");
+        factive.classList.add("nav-active-dark");
+
+        flink1.classList.remove("nav-link-light");
+        flink1.classList.add("nav-link-dark");
+
+        flink2.classList.remove("nav-link-light");
+        flink2.classList.add("nav-link-dark");
+
         lightSwitch.checked = true;
         localStorage.setItem("lightSwitch", "dark");
     }
@@ -15,6 +50,41 @@
     function lightMode() {
         document.body.classList.remove("bg-dark", "text-light");
         document.body.classList.add("bg-light", "text-dark");
+
+        let hactive = document.getElementById("Header Navigation active");
+        let hlink1 = document.getElementById("Header Navigation link 1");
+        let hlink2 = document.getElementById("Header Navigation link 2");
+        
+        let factive = document.getElementById("Footer Navigation active");
+        let flink1 = document.getElementById("Footer Navigation link 1");
+        let flink2 = document.getElementById("Footer Navigation link 2");
+
+        let hhover = document.getElementById("Header Navigation hover");
+        let fhover = document.getElementById("Footer Navigation hover");
+
+        hhover.classList.remove("nav-hover-dark");
+        hhover.classList.add("nav-hover-light");
+
+        fhover.classList.remove("nav-hover-dark");
+        fhover.classList.add("nav-hover-light");
+
+        hactive.classList.remove("nav-active-dark");
+        hactive.classList.add("nav-active-light");
+
+        hlink1.classList.remove("nav-link-dark");
+        hlink1.classList.add("nav-link-light");
+
+        hlink2.classList.remove("nav-link-dark");
+        hlink2.classList.add("nav-link-light");
+
+        factive.classList.remove("nav-active-dark");
+        factive.classList.add("nav-active-light");
+
+        flink1.classList.remove("nav-link-dark");
+        flink1.classList.add("nav-link-light");
+
+        flink2.classList.remove("nav-link-dark");
+        flink2.classList.add("nav-link-light");
 
         lightSwitch.checked = false;
         localStorage.setItem("lightSwitch", "light");

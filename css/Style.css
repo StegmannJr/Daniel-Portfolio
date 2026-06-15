@@ -13,7 +13,6 @@ header h1 {
     position: absolute;
     top: 25px;
     right: 5%;
-    color: white;
 }
 
 nav ul {
@@ -21,7 +20,6 @@ nav ul {
   margin: auto;
   padding: 0;
   overflow: hidden;
-  background-color: #333333;
   max-width: 1400px;
   width: 90%;
 }
@@ -39,11 +37,23 @@ nav li a {
   text-decoration: none;
 }
 
-nav li a:hover {background-color: #202020;}
+.nav-hover-dark :hover {
+    background-color: #202020;
+    color: white;
+}
 
-.active {background-color: #111111;}
+.nav-active-dark {background-color: #111111;}
 
-.link {background-color: #404040;}
+.nav-link-dark {background-color: #404040;}
+
+.nav-hover-light :hover {
+    background-color: #2847cf;
+    color: white;
+}
+
+.nav-active-light {background-color: #3030ff;}
+
+.nav-link-light {background-color: #2e55ff;}
 
 .my-portfolio-container{
     display: flex;
