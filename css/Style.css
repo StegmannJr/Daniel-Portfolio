@@ -16,12 +16,12 @@ header h1 {
 }
 
 nav ul {
-  list-style-type: none;
-  margin: auto;
-  padding: 0;
-  overflow: hidden;
-  max-width: 1400px;
-  width: 90%;
+    list-style-type: none;
+    margin: auto;
+    padding: 0;
+    overflow: hidden;
+    max-width: 1400px;
+    width: 90%;
 }
 
 nav li {
