@@ -20,8 +20,8 @@ nav ul {
     margin: auto;
     padding: 0;
     overflow: hidden;
-    max-width: 1400px;
     width: 90%;
+    min-width: 600px;
 }
 
 nav li {
@@ -70,9 +70,10 @@ nav li a {
 .my-portfolio-container{
     display: flex;
     gap: 40px;
-    max-width: 1400px;
-    box-sizing: border-box;
     width: 90%;
+    min-width: 600px;
+    min-height: 500px;
+    box-sizing: border-box;
     margin: auto;
     padding: 20px;
     flex-wrap: wrap;
