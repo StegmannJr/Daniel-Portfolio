@@ -94,8 +94,8 @@
         hlink2.classList.remove("nav-link-dark");
         hlink2.classList.add("nav-link-light");
 
-        hlink3.classList.remove("nav-link-light");
-        hlink3.classList.add("nav-link-dark");
+        hlink3.classList.remove("nav-link-dark");
+        hlink3.classList.add("nav-link-light");
 
         factive.classList.remove("nav-active-dark");
         factive.classList.add("nav-active-light");
@@ -106,8 +106,8 @@
         flink2.classList.remove("nav-link-dark");
         flink2.classList.add("nav-link-light");
 
-        flink3.classList.remove("nav-link-light");
-        flink3.classList.add("nav-link-dark");
+        flink3.classList.remove("nav-link-dark");
+        flink3.classList.add("nav-link-light");
 
         container.classList.remove("container-dark");
         container.classList.add("container-light");

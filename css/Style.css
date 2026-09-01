@@ -92,9 +92,24 @@ nav li a {
 
 .DAP-Picture {
     height: 350px; 
-    width: auto; 
+    width: auto;
     padding-right: 20px;
     padding-top: 20px;
+}
+
+.co-certification {
+    flex: 1;
+    padding: 20px;
+}
+
+.certification-picture {
+    padding-right: 50px;
+    display: inline-block;
+}
+
+.certification-picture img {
+    height: 270px;
+    width: auto;
 }
 
 .bold {
