@@ -42,9 +42,15 @@ nav li a {
     color: white;
 }
 
-.nav-active-dark {background-color: #111111;}
+.nav-active-dark {
+    background-color: #111111;
+    border: 1px solid #515151
+}
 
-.nav-link-dark {background-color: #404040;}
+.nav-link-dark {
+    background-color: #404040;
+    border: 1px solid #808080;
+}
 
 .nav-hover-light :hover {
     background-color: #2847cf;
