@@ -57,9 +57,15 @@ nav li a {
     color: whitesmoke;
 }
 
-.nav-active-light {background-color: #3030ff;}
+.nav-active-light {
+    background-color: #3030ff;
+    border: 2px solid #5966f0;
+}
 
-.nav-link-light {background-color: #2e55ff;}
+.nav-link-light {
+    background-color: #2e55ff;
+    border: 2px solid #4ea5ff;
+}
 
 .my-portfolio-container{
     display: flex;
