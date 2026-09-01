@@ -19,6 +19,8 @@
         let hhover = document.getElementById("Header Navigation hover");
         let fhover = document.getElementById("Footer Navigation hover");
 
+        let container = document.getElementById("container");
+
         hhover.classList.remove("nav-hover-light");
         hhover.classList.add("nav-hover-dark");
 
@@ -43,6 +45,9 @@
         flink2.classList.remove("nav-link-light");
         flink2.classList.add("nav-link-dark");
 
+        container.classList.remove("container-light");
+        container.classList.add("container-dark");
+
         lightSwitch.checked = true;
         localStorage.setItem("lightSwitch", "dark");
     }
@@ -61,6 +66,8 @@
 
         let hhover = document.getElementById("Header Navigation hover");
         let fhover = document.getElementById("Footer Navigation hover");
+
+        let container = document.getElementById("container");
 
         hhover.classList.remove("nav-hover-dark");
         hhover.classList.add("nav-hover-light");
@@ -85,6 +92,9 @@
 
         flink2.classList.remove("nav-link-dark");
         flink2.classList.add("nav-link-light");
+
+        container.classList.remove("container-dark");
+        container.classList.add("container-light");
 
         lightSwitch.checked = false;
         localStorage.setItem("lightSwitch", "light");

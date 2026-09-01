@@ -31,15 +31,15 @@ nav li {
 
 nav li a {
   display: block;
-  color: white;
+  color: whitesmoke;
+  font-size: 2em;
   text-align: center;
-  padding: 16px;
   text-decoration: none;
 }
 
 .nav-hover-dark :hover {
     background-color: #202020;
-    color: white;
+    color: whitesmoke;
 }
 
 .nav-active-dark {
@@ -54,7 +54,7 @@ nav li a {
 
 .nav-hover-light :hover {
     background-color: #2847cf;
-    color: white;
+    color: whitesmoke;
 }
 
 .nav-active-light {background-color: #3030ff;}
@@ -69,6 +69,25 @@ nav li a {
     width: 90%;
     margin: auto;
     padding: 20px;
+    flex-wrap: wrap;
+}
+
+.container-dark {
+    background-color: #323232;
+    box-shadow: 
+        5px 54px 5px #202020, 
+        5px -54px 5px #202020,
+        -5px 54px 5px #202020,
+        -5px -54px 5px #202020;
+}
+
+.container-light {
+    background-color: #d2d2d2;
+    box-shadow: 
+        5px 54px 5px #c0c0c0,
+        5px -54px 5px #c0c0c0,
+        -5px 54px 5px #c0c0c0,
+        -5px -54px 5px #c0c0c0;
 }
 
 .DAB-Billede{
