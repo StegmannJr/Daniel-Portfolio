@@ -72,6 +72,10 @@ nav li a {
     padding-top: 20px;
 }
 
+.bold {
+    font-weight: bold;
+}
+
 .co-about{
     flex: 1;
     padding: 20px;
@@ -88,7 +92,7 @@ nav li a {
 }
 
 .co-lang{
-    flex: 1;
+    flex: 2;
 }
 
 .co-skills{
