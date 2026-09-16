@@ -14,6 +14,8 @@
         let hlink3 = document.getElementById("Header Navigation link 3");
         let hlink4 = document.getElementById("Header Navigation link 4");
 
+        let proj1 = document.getElementById("project 1");
+
         let factive = document.getElementById("Footer Navigation active");
         let flink1 = document.getElementById("Footer Navigation link 1");
         let flink2 = document.getElementById("Footer Navigation link 2");
@@ -46,6 +48,9 @@
         hlink4.classList.remove("nav-link-light");
         hlink4.classList.add("nav-link-dark");
 
+        proj1.classList.remove("project-light");
+        proj1.classList.add("project-dark")
+
         factive.classList.remove("nav-active-light");
         factive.classList.add("nav-active-dark");
 
@@ -77,6 +82,8 @@
         let hlink2 = document.getElementById("Header Navigation link 2");
         let hlink3 = document.getElementById("Header Navigation link 3");
         let hlink4 = document.getElementById("Header Navigation link 4");
+
+        let proj1 = document.getElementById("project 1")
         
         let factive = document.getElementById("Footer Navigation active");
         let flink1 = document.getElementById("Footer Navigation link 1");
@@ -109,6 +116,9 @@
 
         hlink4.classList.remove("nav-link-dark");
         hlink4.classList.add("nav-link-light");
+
+        proj1.classList.remove("project-dark");
+        proj1.classList.add("project-light");
 
         factive.classList.remove("nav-active-dark");
         factive.classList.add("nav-active-light");

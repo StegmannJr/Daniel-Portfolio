@@ -72,11 +72,12 @@ nav li a {
     gap: 40px;
     width: 90%;
     min-width: 600px;
-    min-height: 500px;
+    min-height: 550px;
     box-sizing: border-box;
     margin: auto;
     padding: 20px;
     flex-wrap: wrap;
+    flex-direction: row; 
 }
 
 .container-dark {
@@ -112,11 +113,14 @@ nav li a {
 .certification-picture {
     padding-right: 50px;
     display: inline-block;
+    margin-top: 20px;
 }
 
 .certification-picture img {
     height: 270px;
     width: auto;
+    border: 5px solid black;
+    border-radius: 5px;
 }
 
 .bold {
@@ -164,22 +168,55 @@ footer h4{
 
 figure a {
     text-decoration: none;
-    color: inherit;
+}
+
+.project-dark {
+    background-color: #606060;
+    border: 3px solid black;
+    box-shadow: 5px 3px 3px #505050;
+}
+
+.project-dark a {
+    color: whitesmoke;
+}
+
+.project-dark p {
+    color: #d0d0d0;
+}
+
+.project-dark a:hover {
+    color: #e0e0e0;
+}
+
+.project-light {
+    background-color: #c3c3c3;
+    border: 3px solid gray;
+    box-shadow: 5px 3px 3px #a3a3a3;
+}
+
+.project-light a {
+    color: #303030
+}
+
+.project-light p {
+    color: #656565;
+}
+
+.project-light a:hover {
+    color: #202020;
 }
 
 .project {
-    width: 30%;
+    width: 40%;
     padding: 10px;
-    background-color: gray;
-    border: 3px solid black;
     border-radius: 10px;
-    box-shadow: 5px 3px 3px gray;
     transform: 3s;
+    display: inline-block;
+    margin: 30px;
 }
 
 .project:hover {
     scale: 1.05;
-    color: lightgray;
 }
 
 .project-picture {
