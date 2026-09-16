@@ -12,11 +12,13 @@
         let hlink1 = document.getElementById("Header Navigation link 1");
         let hlink2 = document.getElementById("Header Navigation link 2");
         let hlink3 = document.getElementById("Header Navigation link 3");
+        let hlink4 = document.getElementById("Header Navigation link 4");
 
         let factive = document.getElementById("Footer Navigation active");
         let flink1 = document.getElementById("Footer Navigation link 1");
         let flink2 = document.getElementById("Footer Navigation link 2");
         let flink3 = document.getElementById("Footer Navigation link 3");
+        let flink4 = document.getElementById("Footer Navigation link 4");
 
         let hhover = document.getElementById("Header Navigation hover");
         let fhover = document.getElementById("Footer Navigation hover");
@@ -41,6 +43,9 @@
         hlink3.classList.remove("nav-link-light");
         hlink3.classList.add("nav-link-dark");
 
+        hlink4.classList.remove("nav-link-light");
+        hlink4.classList.add("nav-link-dark");
+
         factive.classList.remove("nav-active-light");
         factive.classList.add("nav-active-dark");
 
@@ -52,6 +57,9 @@
 
         flink3.classList.remove("nav-link-light");
         flink3.classList.add("nav-link-dark");
+
+        flink4.classList.remove("nav-link-light");
+        flink4.classList.add("nav-link-dark");
 
         container.classList.remove("container-light");
         container.classList.add("container-dark");
@@ -68,11 +76,13 @@
         let hlink1 = document.getElementById("Header Navigation link 1");
         let hlink2 = document.getElementById("Header Navigation link 2");
         let hlink3 = document.getElementById("Header Navigation link 3");
+        let hlink4 = document.getElementById("Header Navigation link 4");
         
         let factive = document.getElementById("Footer Navigation active");
         let flink1 = document.getElementById("Footer Navigation link 1");
         let flink2 = document.getElementById("Footer Navigation link 2");
         let flink3 = document.getElementById("Footer Navigation link 3");
+        let flink4 = document.getElementById("Footer Navigation link 4");
 
         let hhover = document.getElementById("Header Navigation hover");
         let fhover = document.getElementById("Footer Navigation hover");
@@ -97,6 +107,9 @@
         hlink3.classList.remove("nav-link-dark");
         hlink3.classList.add("nav-link-light");
 
+        hlink4.classList.remove("nav-link-dark");
+        hlink4.classList.add("nav-link-light");
+
         factive.classList.remove("nav-active-dark");
         factive.classList.add("nav-active-light");
 
@@ -108,6 +121,9 @@
 
         flink3.classList.remove("nav-link-dark");
         flink3.classList.add("nav-link-light");
+
+        flink4.classList.remove("nav-link-dark");
+        flink4.classList.add("nav-link-light");
 
         container.classList.remove("container-dark");
         container.classList.add("container-light");
