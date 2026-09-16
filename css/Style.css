@@ -157,3 +157,32 @@ nav li a {
 footer h4{
     text-align: center;
 }
+
+.co-projects {
+    flex: 1;
+}
+
+figure a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.project {
+    width: 30%;
+    padding: 10px;
+    background-color: gray;
+    border: 3px solid black;
+    border-radius: 10px;
+    box-shadow: 5px 3px 3px gray;
+    transform: 3s;
+}
+
+.project:hover {
+    scale: 1.05;
+    color: lightgray;
+}
+
+.project-picture {
+    width: 100%;
+    border-radius: 10px;
+}
